@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+ <!-- Start rosserial Arduino node -->
+  <node name="serial_node" pkg="rosserial_python" type="serial_node.py" output="screen">
+      <rosparam file="$(find robot_bringup)/config/start/serial_params.yaml" command="load" />
+  </node>
+
+  <node pkg="robot_bringup" type="Differential_TF" name="Differential_TF" output="screen">
+    <rosparam file="$(find robot_bringup)/config/start/odom_encoder_params.yaml" command="load" />
+    <remap from="odom" to="/robot_velocity_controller/odom"/>
+  </node>
+
+  <node name="Cmd_Vel_to_Arduino" pkg="robot_bringup" type="Cmd_Vel_to_Arduino" respawn="false"
+     output="screen"/>
+     
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+  <node pkg="tf" type="static_transform_publisher" name="base_to_laser_broadcaster" args="0.15 0 .25 0 0 0 robot_footprint laser 40" />
+  
+  <node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+    <rosparam command="load" file="$(find robot_bringup)/config/start/my_laser_config.yaml" />   
+  </node>
+  
+  <arg name="map" default="map_whole1"/>
+  <arg name="map_file" default="$(find robot_bringup)/map/$(arg map).yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+  
+   <!--include file="$(find robot_bringup)/launch/gmapping.launch"/-->
+   <include file="$(find robot_bringup)/launch/amcl.launch" />
+   <include file="$(find robot_bringup)/launch/move_base.launch"/>
+ 
+
+</launch>

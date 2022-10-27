@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+  <!-- robot parameters -->
+  <arg name="robot" default="ommp_robot"/>
+  <arg name="rosserial" default="false"/>
+  <arg name="laser" default="false"/>
+  <arg name="fake_execution" default="false"  doc="face execution mode" />
+  <arg name="rviz" default="false"/>
+  <arg name="config" default="drive"/>
+
+  <arg name="moveit" default="false"/>
+  <arg name="navigation" default="false"/>
+  <arg name="gmapping" default="false"/>
+  <arg name="amcl" default="false"/>
+  <arg name="teleop" default="false"/>
+
+  <!-- send urdf to param server -->
+  <arg name="model" default="$(find base_new_description)/urdf/base_new.xacro"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
+
+  <!-- HARDWARE -->
+  <!--Load Hardware Interface and Ros Controller Configuration to param server -->
+  <rosparam file="$(find robot_bringup)/config/start/our_robot_driver.yaml" command="load"/>
+  <!--set fake execution parameter from arg-->
+  <rosparam command="load" param="fake_execution" ns="ommp_hardware_interface" subst_value="True">$(arg fake_execution)</rosparam>
+  <!-- start hardware interface node for the arm -->
+  <node name="ommp_hw_interface_node" pkg="ommp_hw_interface" type="ommp_hw_interface_node" output="screen" launch-prefix=""/>
+  <!-- start controllers-->
+  <node name="controller_spawner" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" 
+    args="spawn joint_state_controller ommp_velocity_controller"/>
+  <!-- load other controllers for manual guidance - we need to switch between them through a service call -->
+  <!-- <node name="controller_loader" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" 
+    args="load joint_group_position_controller" /> -->
+  <!--Start robot state publisher -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <!-- Start rosserial Arduino node -->
+  <!--group if="$(arg rosserial)">
+    <node name="rosserial_node" pkg="rosserial_python" type="serial_node.py" output="screen">
+        <rosparam file="$(find ommp_bringup)/config/start/serial_params.yaml" command="load" />
+    </node>
+  </group-->
+  
+  <!-- Start the LIDAR driver -->
+  <!--group if="$(arg laser)">
+    <node name="ydlidar_node"  pkg="ydlidar_ros"  type="ydlidar_node" output="screen" respawn="false" >
+      <rosparam file="$(find ommp_bringup)/config/start/ydlidar_params.yaml" command="load" />
+    </node>    
+  </group-->
+
+  <!-- moveit -->
+
+  <!--group if="$(arg navigation)">
+    <include file="$(find ommp_navigation)/launch/navigation_main.launch"/>
+  </group-->
+  
+  <!--group if="$(arg gmapping)">
+    <include file="$(find ommp_navigation)/launch/gmapping_main.launch"/>
+  </group-->
+  
+  <!--group if="$(arg amcl)">
+    <include file="$(find ommp_navigation)/launch/amcl_main.launch"/>
+  </group-->
+  
+  <group if="$(arg teleop)">
+    <node name="teleop" pkg="ommp_bringup" type="teleop_noetic.py" output="screen"/>
+  </group>
+
+  <!-- camera relay-->
+  <!-- <node name="Camera_Relay" pkg="ommp_bringup" type="Camera_Relay" respawn="false" 
+  output="screen"/> -->
+
+  <!-- Transforms Joint_states to appropiate servo commmands for rosserial -->
+  <!-- Arm is a clone of joint_States - perfect execution -->
+  <!-- <node name="Pub_to_PCA9685_Driver" pkg="ommp_bringup" type="Pub_to_PCA9685_Driver" respawn="false" 
+  output="screen"/> -->  
+  <!-- Load the PCA9685 Driver -->
+  <!-- <node name="PCA9685_driver" pkg="pwm_pca9685" type="pca9685_node" respawn="false" 
+  output="screen"/> -->
+
+
+  <!-- Kinect motors pitch -->
+  <!--node name="Kinect_AUX" pkg="kinect_aux" type="kinect_aux_node" respawn="false" 
+  output="screen"/-->
+
+  <!-- Comment : to start Kinect driver I use docker run the following command-->
+  <!--docker start kinect && docker exec kinect /bin/bash -->
+
+
+  <!-- Optional laser odometry publish tf? -->
+  <!--node pkg="rf2o_laser_odometry" type="rf2o_laser_odometry_node" name="rf2o_laser_odometry" output="screen">
+    <rosparam file="$(find ommp_bringup)/config/rf2o_laser_odometry_params.yaml" command="load" />
+  </node-->
+
+  <!-- Optional EKF Sensor Fusion -->
+  <!--node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
+    <rosparam file="$(find ommp_control)/config/ekf_localization.yaml" command="load" />
+    <remap from="odometry/filtered" to="odometry/filtered"/>
+  </node-->
+
+  <group if="$(arg rviz)">
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find robot_bringup)/rviz/$(arg config).rviz" />
+  </group>
+</launch>

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="robot" default="ommp"/> <!--ommp_real-->
+  <!-- send urdf to param server -->
+  <param name="robot_description" command="$(find xacro)/xacro '$(find ommp_description)/robots/$(arg robot).urdf.xacro'" />
+  
+</launch>

@@ -1,0 +1,92 @@
+<?xml version='1.0'?>
+
+<robot name="ommp_real" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <arg name="robot" default="ommp_robot"/>
+
+  <xacro:property name="prefix" value="" />
+  <!-- <xacro:property name="pi" value="3.141592653" /> -->
+
+  <!-- !Include Sensors macros -->
+  <!--ydlidar -->
+  <xacro:include filename="$(find ommp_description)/urdf/sensors/lidar.xacro" />
+
+  <!-- !Include Base Macro-->
+  <xacro:include filename="$(find ommp_description)/urdf/base/base.xacro" />
+
+  <!-- !Include Wheel Macro-->
+  <xacro:include filename="$(find ommp_description)/urdf/wheel/wheel.xacro" />
+
+  <!-- Incude Inertia macros -->
+  <!-- <xacro:include filename="$(find ommp_description)/urdf/macros/inertia_macros.urdf.xacro" /> -->
+
+  <!-- Include costum Arm -->
+  <!-- <xacro:include filename="$(find ommp_description)/urdf/arms/generic_arm/generic_arm.urdf.xacro" /> -->
+  
+  <!-- Include costum Gripper -->
+  <!-- <xacro:include filename="$(find ommp_description)/urdf/grippers/generic_gripper/generic_gripper.urdf.xacro" /> -->
+
+  <!-- All the bases of the robot -->
+  <!-- <xacro:property name="chassis_size">
+    <box size = "0.4 0.29 0.02"/>
+  </xacro:property> -->
+  <xacro:ommp_base prefix="${prefix}">
+    <chassis_size>
+        <box size = "0.4 0.29 0.02"/>
+    </chassis_size> 
+  </xacro:ommp_base>
+  
+  <!-- Instanciate the 4 wheels of the robot -->
+  <xacro:wheel prefix="${prefix}front_left_" parent="chassis">
+    <origin xyz="0.18 0.18 -0.035" rpy="0 0 0"/>
+    <wheel_size>
+        <cylinder length = "0.06" radius="0.05"/>
+    </wheel_size> 
+  </xacro:wheel>
+  <xacro:wheel prefix="${prefix}front_right_" parent="chassis">
+    <origin xyz="0.18 -0.18 -0.035" rpy="0 0 0"/>
+    <wheel_size>
+        <cylinder length = "0.06" radius="0.05"/>
+    </wheel_size> 
+  </xacro:wheel>
+  <xacro:wheel prefix="${prefix}rear_left_" parent="chassis">
+    <origin xyz="-0.18 0.18 -0.035" rpy="0 0 0"/>
+    <wheel_size>
+        <cylinder length = "0.06" radius="0.05"/>
+    </wheel_size> 
+  </xacro:wheel>
+  <xacro:wheel prefix="${prefix}rear_right_" parent="chassis">
+    <origin xyz="-0.18 -0.18 -0.035" rpy="0 0 0"/>
+    <wheel_size>
+        <cylinder length = "0.06" radius="0.05"/>
+    </wheel_size> 
+  </xacro:wheel>
+
+  <!-- Instanciate the sensor macros -->
+  <xacro:sensor_laser prefix="${prefix}"  parent="chassis">
+    <origin xyz="0.05 0 0.09" rpy="0 0 0"/>
+  </xacro:sensor_laser>
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Instanciate the Generic Arm macros -->
+  
+  <!-- connect arm -->
+  <!-- <xacro:generic_arm 
+    prefix="" 
+    parent="${generic_arm_parent}" 
+    transmission_hw_interface="${transmission_hw_interface}" 
+    safety_limits="${safety_limits}"
+    safety_pos_margin="${safety_pos_margin}"
+    safety_k_position="${safety_k_position}"/> -->
+
+</robot>
+

@@ -1,0 +1,44 @@
+<?xml version="1.0" ?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  
+
+  <xacro:macro name="ommp_base" params="prefix **chassis_size">
+
+    <link name="${prefix}robot_footprint"></link>
+
+    <joint name="${prefix}robot_footprint_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${prefix}robot_footprint"/>
+      <child link="${prefix}chassis" />
+    </joint>
+
+    <link name='${prefix}chassis'>
+     <inertial>
+       <origin xyz="0 0 0" rpy="0 0 0"/>
+       <mass value="100"/>
+       <inertia ixx="0.05"  ixy="0"  ixz="0" iyy="0.05" iyz="0" izz="0.05" />
+     </inertial>
+
+     <collision name='collision'>
+        <origin xyz="0 0 0" rpy=" 0 0 0"/> 
+        <geometry>
+          <xacro:insert_block name="chassis_size" />
+        </geometry>
+      </collision>
+
+      <visual name='visual'>
+        <origin xyz="0 0 0" rpy=" 0 0 0"/>
+        <geometry>
+          <xacro:insert_block name="chassis_size" />
+        </geometry>
+        <material name="green">
+          <color rgba="0 1 0 1"/>
+        </material>
+      </visual>
+
+    </link>
+
+  </xacro:macro>
+
+</robot>

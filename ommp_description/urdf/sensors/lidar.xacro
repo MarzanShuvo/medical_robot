@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+  <!-- <xacro:if value="$(arg sim)">
+      <xacro:include filename="$(find ommp_description)/urdf/sensors/ydlidar/ydlidar.gazebo.xacro" />
+
+      <xacro:laser_gazebo_sensor link_name="laser_link" laser_name="ydlidar"
+                         frame_name="laser_link"/>
+  </xacro:if> -->
+
+  <!-- ydlidar Link -->
+  <xacro:macro name="sensor_laser" params="prefix parent *origin">
+
+    <!--joint-->
+    <joint type="fixed" name="${prefix}ydlidar_joint">
+      <xacro:insert_block name="origin" />
+      <child link="laser_frame"/>
+      <parent link="${parent}"/>
+    </joint>
+
+    <link name="laser_frame">
+      <inertial>
+        <mass value="0.1"/>
+        <origin xyz="0 0 0.0" rpy="0 0 0"/>
+        <inertia
+            ixx="1e-6" ixy="0" ixz="0"
+            iyy="1e-6" iyz="0"
+            izz="1e-6"
+        />
+      </inertial>
+      <visual>
+        <geometry>
+          <mesh filename="package://ommp_description/meshes/sensors/ydlidar/ydlidar.dae"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </visual>
+        <collision>
+          <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+          <geometry>
+            <box size="0.0 0.0 0.0"/>
+          </geometry>
+        </collision>
+    </link>
+
+  </xacro:macro>
+  
+  <!-- gazebo macro-->
+  <xacro:macro name="laser_gazebo_sensor" params="link_name laser_name  ">
+    <!-- hokuyo -->
+    <gazebo reference="${link_name}">
+      <sensor type="gpu_ray" name="${laser_name}">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>false</visualize>
+        <update_rate>40</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14</min_angle>
+              <max_angle>3.14</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.3</min>
+            <max>50.0</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <!-- Noise parameters based on published spec for Hokuyo laser
+                achieving "+-30mm" accuracy at range < 10m.  A mean of 0.0m and
+                stddev of 0.01m will put 99.7% of samples within 0.03m of the true
+                reading. -->
+            <mean>0.0</mean>
+            <stddev>0.0</stddev>
+          </noise>
+        </ray>
+        <plugin name="gazebo_ros_head_ydlidar_controller" filename="libgazebo_ros_gpu_laser.so">
+          <topicName>/scan</topicName>
+          <frameName>${frame_name}</frameName>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+</robot>
